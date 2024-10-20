@@ -10,6 +10,7 @@ typedef struct heap {
     int* array;
     int array_size;
     int heap_size;
+    short ordering_criteria;
 
 } heap_t;
 
@@ -67,7 +68,11 @@ int heapify (heap_t heap, int index, short ordering_criteria) {
                 perror("Error while swapping items");
                 exit(EXIT_FAILURE);
             }
-            heapify(heap, min, MIN);
+
+            if (heapify(heap, min, MIN) != 0){
+                perror("Error heapifing array after building heap");
+                exit(EXIT_FAILURE);
+            }
         }
     } else if (ordering_criteria == MAX){
         int max = index;
@@ -88,29 +93,78 @@ int heapify (heap_t heap, int index, short ordering_criteria) {
                 perror("Error while swapping items");
                 exit(EXIT_FAILURE);
             }
-            heapify(heap, max, MAX);
-        }
 
+            if (heapify(heap, max, MAX) != 0){
+                perror("Error heapifing array after building heap");
+                exit(EXIT_FAILURE);
+            }
+        }
     } else {
         perror("Error while trying to heapify array");
         exit(EXIT_FAILURE);
     }
 
-
     return 0;
+    // Complessità: O(n log(n))
 }
 
 int build_heap (heap_t heap, int heap_size, short ordering_criteria) {
+    //checks weather should be MIN or MAX _HEAP
     if (ordering_criteria != MAX && ordering_criteria != MIN) {
         perror("Error with inputed ordering criteria: either MIN or MAX");
         exit(EXIT_FAILURE);
     }
 
     for (int i = (heap_size/2); i >= HEAP_ROOT; i--) {
-        heapify(heap, i, ordering_criteria);
+        if (heapify(heap, i, ordering_criteria) != 0){
+            perror("Error heapifing array after building heap");
+            exit(EXIT_FAILURE);
+        }
     }
     return 0;
+    // Complessità: O(n)
 }
+
+int insert (heap_t heap, int value, short ordering_criteria) {
+    //Error check
+    if (heap.heap_size == heap.array_size) {
+        perror("Error while inserting item. Heap size is equal to Array size");
+        exit(EXIT_FAILURE);
+    }
+    int i = heap.heap_size++;
+    heap.array[i] = value;
+    int p = parent_node(i);
+    while (p > 0) {
+        if (heap.ordering_criteria == MIN) {
+            if (heap.array[p] > heap.array[i]) {
+                swap(heap, i, p);
+                i = p;
+                p = parent_node(i);
+            }
+
+        } else if (heap.ordering_criteria == MAX) {
+            if (heap.array[p] < heap.array[i]) {
+                swap(heap, i, p);
+                i = p;
+                p = parent_node(i);
+            }
+
+        } else {
+            perror("Error while swapping new inserted item");
+            exit(EXIT_FAILURE);
+        }
+
+    }
+
+    return 0;
+    // Complessità: O(n log(n))
+}
+
+int extract () {
+
+    return 0;
+}
+
 
 int main (int argc, char* argv[]) {
     heap_t heap;
@@ -139,8 +193,9 @@ int main (int argc, char* argv[]) {
     printf("\n");
 
     //TEST MIN HEAP
+    heap.ordering_criteria = MIN;
     printf("[MAIN] Heapifing array. MIN_HEAP. Heap-size: %d\n", heap.heap_size);
-    if (build_heap(heap, heap.heap_size, MIN) != 0) {
+    if (build_heap(heap, heap.heap_size, heap.ordering_criteria) != 0) {
         perror("Error while doing heapify");
         exit(EXIT_FAILURE);
     }
@@ -154,8 +209,9 @@ int main (int argc, char* argv[]) {
     printf("\n");
 
     //TEST MAX HEAP
+    heap.ordering_criteria = MAX;
     printf("[MAIN] Heapifing array. MAX_HEAP. Heap-size: %d\n", heap.heap_size);
-    if (build_heap(heap, heap.heap_size, MAX) != 0) {
+    if (build_heap(heap, heap.heap_size, heap.ordering_criteria) != 0) {
         perror("Error while doing heapify");
         exit(EXIT_FAILURE);
     }
