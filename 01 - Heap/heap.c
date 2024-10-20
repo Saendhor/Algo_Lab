@@ -3,6 +3,8 @@
 #include <unistd.h>
 
 #define HEAP_ROOT 1
+#define MAX 0
+#define MIN 1
 
 typedef struct heap {
     int* array;
@@ -35,41 +37,77 @@ int swap(heap_t heap, int index_1, int index_2) {
     return 0;
 }
 
-//TO UPGRADE TO FIT BOTH MAX AND MIN HEAPIFY
 int iteration = 0;
-int heapify (heap_t heap, int index) {
-    int left, right, parent, min;
+int heapify (heap_t heap, int index, short ordering_criteria) {
+    int left, right, parent, ordering_value;
     
     //DEBUG
     iteration += 1;
-    printf("[H] Iteration n.%d with index %d\n", iteration, index);
+    printf("\n[H] Iteration n.%d with index %d\n", iteration, index);
 
     left = left_node(index);
     right = right_node(index);
-    min = index;
 
-    printf("[H] left: %d, right: %d, min: %d\n", left, right, min);
-    printf("[H] item: %d, item: %d, val: %d\n", heap.array[left], heap.array[right], heap.array[min]);
-    //Check LEFT(i)
-    if (left < heap.heap_size && heap.array[left] < heap.array[min]) {
-        min = left;
-        printf("[H] left < heapsize && left (%d) < min (%d)\n", left, min);
-    }
+    if (ordering_criteria == MIN){
+        int min = index;
 
-    //Check RIGHT(i)
-    if (right < heap.heap_size && heap.array[right] < heap.array[min]) {
-        min = right;
-        printf("[H] right < heapsize && right (%d) < min (%d)\n", right, min);
-    }
-
-    //Check and reorder
-    if (min != index){
-        printf("[H] min (%d) != index (%d)\n", min, index);
-        if (swap(heap, index, min) != 0){
-            perror("Error while swapping items");
-            exit(EXIT_FAILURE);
+        //Check LEFT(i)
+        if (left < heap.heap_size && heap.array[left] <= heap.array[min]) {
+            min = left;
         }
-        heapify(heap, min);
+
+        //Check RIGHT(i)
+        if (right < heap.heap_size && heap.array[right] <= heap.array[min]) {
+            min = right;
+        }
+
+        //Check and reorder
+        if (min != index){
+            if (swap(heap, index, min) != 0){
+                perror("Error while swapping items");
+                exit(EXIT_FAILURE);
+            }
+            heapify(heap, min, MIN);
+        }
+    } else if (ordering_criteria == MAX){
+        int max = index;
+
+        //Check LEFT(i)
+        if (left < heap.heap_size && heap.array[left] >= heap.array[max]) {
+            max = left;
+        }
+
+        //Check RIGHT(i)
+        if (right < heap.heap_size && heap.array[right] >= heap.array[max]) {
+            max = right;
+        }
+
+        //Check and reorder
+        if (max != index){
+            if (swap(heap, index, max) != 0){
+                perror("Error while swapping items");
+                exit(EXIT_FAILURE);
+            }
+            heapify(heap, max, MAX);
+        }
+
+    } else {
+        perror("Error while trying to heapify array");
+        exit(EXIT_FAILURE);
+    }
+
+
+    return 0;
+}
+
+int build_heap (heap_t heap, int heap_size, short ordering_criteria) {
+    if (ordering_criteria != MAX && ordering_criteria != MIN) {
+        perror("Error with inputed ordering criteria: either MIN or MAX");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = (heap_size/2); i >= HEAP_ROOT; i--) {
+        heapify(heap, i, ordering_criteria);
     }
     return 0;
 }
@@ -100,15 +138,31 @@ int main (int argc, char* argv[]) {
     }
     printf("\n");
 
-    printf("[MAIN] Heapifing array. Heap-size: %d\n", heap.heap_size);
-    if (heapify(heap, HEAP_ROOT) != 0) {
+    //TEST MIN HEAP
+    printf("[MAIN] Heapifing array. MIN_HEAP. Heap-size: %d\n", heap.heap_size);
+    if (build_heap(heap, heap.heap_size, MIN) != 0) {
         perror("Error while doing heapify");
         exit(EXIT_FAILURE);
     }
     printf("\n");
 
 
-    printf("[MAIN] Printing heapified array\n");
+    printf("[MAIN] Printing heapified array. MIN_HEAP\n");
+    for (int i = 1; i < heap.array_size; i++) {
+        printf("[MAIN] Item '%d' in array at index '%d'\n", heap.array[i], i);
+    }
+    printf("\n");
+
+    //TEST MAX HEAP
+    printf("[MAIN] Heapifing array. MAX_HEAP. Heap-size: %d\n", heap.heap_size);
+    if (build_heap(heap, heap.heap_size, MAX) != 0) {
+        perror("Error while doing heapify");
+        exit(EXIT_FAILURE);
+    }
+    printf("\n");
+
+
+    printf("[MAIN] Printing heapified array. MAX_HEAP\n");
     for (int i = 1; i < heap.array_size; i++) {
         printf("[MAIN] Item '%d' in array at index '%d'\n", heap.array[i], i);
     }
