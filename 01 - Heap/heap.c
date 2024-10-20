@@ -180,6 +180,11 @@ int extract (heap_t heap) {
     return heap.array[heap.heap_size +1];
 }
 
+// HEAPSORT (A, n)
+    //BUILD_MAX_HEAP (A, n)
+    //for (int i = 1; i < n-1; i++) {
+        //EXTRACT_MAX(A)
+
 
 int main (int argc, char* argv[]) {
     heap_t heap;
