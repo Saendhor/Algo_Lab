@@ -49,6 +49,7 @@ int heapify (heap_t heap, int index, short ordering_criteria) {
     left = left_node(index);
     right = right_node(index);
 
+    //If MIN_HEAP
     if (ordering_criteria == MIN){
         int min = index;
 
@@ -74,6 +75,7 @@ int heapify (heap_t heap, int index, short ordering_criteria) {
                 exit(EXIT_FAILURE);
             }
         }
+    //If MAX_HEAP
     } else if (ordering_criteria == MAX){
         int max = index;
 
@@ -105,7 +107,7 @@ int heapify (heap_t heap, int index, short ordering_criteria) {
     }
 
     return 0;
-    // Complessità: O(n log(n))
+    // Complexity: O(n log(n))
 }
 
 int build_heap (heap_t heap, int heap_size, short ordering_criteria) {
@@ -122,7 +124,7 @@ int build_heap (heap_t heap, int heap_size, short ordering_criteria) {
         }
     }
     return 0;
-    // Complessità: O(n)
+    // Complexity: O(n)
 }
 
 int insert (heap_t heap, int value, short ordering_criteria) {
@@ -135,20 +137,22 @@ int insert (heap_t heap, int value, short ordering_criteria) {
     heap.array[i] = value;
     int p = parent_node(i);
     while (p > 0) {
+        // If MIN_HEAP
         if (heap.ordering_criteria == MIN) {
             if (heap.array[p] > heap.array[i]) {
                 swap(heap, i, p);
                 i = p;
                 p = parent_node(i);
-            }
 
+            }
+        // If MAX_HEAP
         } else if (heap.ordering_criteria == MAX) {
             if (heap.array[p] < heap.array[i]) {
                 swap(heap, i, p);
                 i = p;
                 p = parent_node(i);
             }
-
+        //If is neither of the options => ERROR
         } else {
             perror("Error while swapping new inserted item");
             exit(EXIT_FAILURE);
@@ -157,12 +161,23 @@ int insert (heap_t heap, int value, short ordering_criteria) {
     }
 
     return 0;
-    // Complessità: O(n log(n))
+    // Complexity: O(n log(n))
 }
 
-int extract () {
+int extract (heap_t heap) {
+    if (swap(heap, HEAP_ROOT, heap.heap_size) != 0){
+        perror("Error while swapping leaf item with root item");
+        exit(EXIT_FAILURE);
+    }
 
-    return 0;
+    heap.heap_size--;
+
+    if (heapify(heap, HEAP_ROOT, heap.ordering_criteria) != 0) {
+        perror("Error heapifing array");
+        exit(EXIT_FAILURE);
+    }
+
+    return heap.array[heap.heap_size +1];
 }
 
 
